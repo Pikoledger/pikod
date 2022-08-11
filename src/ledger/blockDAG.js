@@ -1,16 +1,20 @@
+
 module.exports = class BlockDAG {
   constructor () {
-    this.db = {}
+    this.blocksDB = {}
+    this.accountsDB = {}
   }
 
   checkIntegrity (block) {
-    if (block.type === 'send') {
-      
-    } else if (block.type === 'receive') {
+    const chain = this.db[block.sender]
 
-    } else if (block.type === 'consensus') {
+    if (block.chainedBlock !== chain?.[(chain?.length ?? 0) - 1] ?? null) return false
 
+    if (block.type === 'receive') {
+      if (typeof this.blocksDB?.[block.block] === 'undefined') return false
     }
+
+    return true
   }
 
   addBlock (block) {
