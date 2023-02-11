@@ -27,7 +27,7 @@ module.exports = class jsonRPC {
   listenRequests (port) {
     http.createServer((request, response) => {
       if (request.method === "POST") {
-        let receivedData = Buffer.alloc(0)
+        let receivedData = Buffer.allocUnsafe(0)
 
         request.on("data", function (chunk) {
           receivedData = Buffer.concat([ receivedData, chunk ])
@@ -47,7 +47,6 @@ module.exports = class jsonRPC {
           
             response.end(JSON.stringify(new Response(returnedData).toJSON()))
           } catch (err) {
-            // TODO: Move writeHead to better places for better performance & error handling
             response.end(JSON.stringify(new Error(err.message).toJSON())) 
           }
         })

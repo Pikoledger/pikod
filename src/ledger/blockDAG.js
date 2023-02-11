@@ -15,17 +15,19 @@ module.exports = class BlockDAG {
   async isBlockValid (block) {
     const accountCache = await this.getBlocks(block.sender)
 
-    if (accountCache[accountCache.length - 1] !== block.chainedBlock) return false
+    if (typeof accountCache[accountCache.length - 1] === 'undefined') {
+      if (typeof block.chainedBlock !== undefined) return false
+    } else { 
+      if (accountCache[accountCache.length - 1] !== block.chainedBlock) return false
+    }
 
     if (block.type === 'send') {
       if (BigInt(block.amount) > BigInt(await this.getBalance(block.sender))) return false
-    }
-
-    if (block.type === 'receive') {
+    } else if (block.type === 'receive') {
       const receivingBlock = await this.getBlock(block.block)
 
       if (receivingBlock.type !== 'send' || receivingBlock.recipient !== block.sender) return false
-    }
+    } else return false
 
     return true
   }

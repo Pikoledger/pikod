@@ -46,7 +46,7 @@ module.exports = class Block {
       amount: this?.amount,
       data: this?.data,
       block: this?.block,
-      chainedBlock: this.chainedBlock,
+      chainedBlock: this?.chainedBlock,
       signature: this.signature,
       confirmed: this.confirmed
     }

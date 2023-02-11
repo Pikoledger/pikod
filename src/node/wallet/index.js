@@ -1,6 +1,6 @@
 const tweetnacl = require('tweetnacl-blake2b')
 
-class Wallet {
+module.exports = class Wallet {
   constructor (privateKey) {
     this._keyPair = tweetnacl.sign.keyPair.fromSecretKey(Uint8Array.from(Buffer.from(privateKey, 'hex')))
 
@@ -18,5 +18,3 @@ class Wallet {
     return nacl.sign.detached(Uint8Array.from(Buffer.from(data, 'hex')), this._keyPair.secretKey)
   }
 }
-
-module.exports = Wallet
