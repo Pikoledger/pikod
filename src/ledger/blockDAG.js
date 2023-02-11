@@ -55,7 +55,9 @@ module.exports = class BlockDAG {
   }
 
   async getBlock (hash) {
-    return new Block(this.blocksDB.get(hash))
+    const fetchedBlock = this.blocksDB.get(hash)
+
+    return typeof fetchedBlock !== 'undefined' ? new Block(fetchedBlock) : undefined
   }
 
   async getBalance (account) {

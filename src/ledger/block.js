@@ -48,7 +48,7 @@ module.exports = class Block {
       block: this?.block,
       chainedBlock: this?.chainedBlock,
       signature: this.signature,
-      confirmed: this.confirmed
+      confirmed: true
     }
   }
 }
