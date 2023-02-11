@@ -2,14 +2,11 @@ const crypto = require('crypto')
 const tweetnacl = require('tweetnacl-blake2b')
 
 module.exports = class Block {
-  constructor (type, contents) {
-    this.type = type
+  constructor (block) {
+    this.type = block.type
     this.hash = block.hash
-    this.confirmed = false
-
     this.sender = block.sender
-    this.fee = block.fee
-  
+
     if (this.type === 'send') {
       this.recipient = block.recipient
       this.amount = block.amount
@@ -22,6 +19,7 @@ module.exports = class Block {
 
     this.chainedBlock = block.chainedBlock
     this.signature = block.signature
+    this.confirmed = false
   }
 
   calculateHash () {
@@ -32,11 +30,25 @@ module.exports = class Block {
     }
   }
 
-  checkValidity () {
+  async checkValidity () {
     if (!(this.type === 'send' || this.type === 'receive')) return false
     if (this.calculateHash() !== this.hash) return false
 
-    const message = tweetnacl.sign.open(Uint8Array.from(Buffer.from(this.signature)), Uint8Array.from(Array.from(this.sender)))
-    return(this.hash === Buffer.from(message).toString('hex'))
+    return tweetnacl.sign.detached.verify(Uint8Array.from(Buffer.from(this.hash, 'hex')), Uint8Array.from(Buffer.from(this.signature, 'hex')), Uint8Array.from(Buffer.from(this.sender, 'hex')))
+  }
+
+  toJSON () {
+    return {
+      type: this.type,
+      hash: this.hash,
+      sender: this.sender,
+      recipient: this?.recipient,
+      amount: this?.amount,
+      data: this?.data,
+      block: this?.block,
+      chainedBlock: this.chainedBlock,
+      signature: this.signature,
+      confirmed: this.confirmed
+    }
   }
 }

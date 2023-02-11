@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "lmdb": "^2.5.2",
+    "random-seedable": "^1.0.8",
+    "tweetnacl-blake2b": "^1.0.1"
+  }
+}

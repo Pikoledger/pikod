@@ -1,25 +1,71 @@
+const lmdb = require('lmdb')
+
+const Block = require('./block')
 
 module.exports = class BlockDAG {
-  constructor () {
-    this.blocksDB = {}
-    this.accountsDB = {}
+  constructor(dir) {
+    this.db = lmdb.open({
+      path: `${dir}/ledger.ldb`
+    })
+
+    this.accountsDB = this.db.openDB("accounts")
+    this.blocksDB = this.db.openDB("blocks")
   }
 
-  checkIntegrity (block) {
-    const chain = this.db[block.sender]
+  async isBlockValid (block) {
+    const accountCache = await this.getBlocks(block.sender)
 
-    if (block.chainedBlock !== chain?.[(chain?.length ?? 0) - 1] ?? null) return false
+    if (accountCache[accountCache.length - 1] !== block.chainedBlock) return false
+
+    if (block.type === 'send') {
+      if (BigInt(block.amount) > BigInt(await this.getBalance(block.sender))) return false
+    }
 
     if (block.type === 'receive') {
-      if (typeof this.blocksDB?.[block.block] === 'undefined') return false
+      const receivingBlock = await this.getBlock(block.block)
+
+      if (receivingBlock.type !== 'send' || receivingBlock.recipient !== block.sender) return false
     }
 
     return true
   }
 
-  addBlock (block) {
-    if (typeof this.db[block.sender] === 'undefined') this.db[block.sender] = []
+  async addBlock (block) {
+    const accountCache = await this.getBlocks(block.sender)
+    const prevBalance = BigInt((await this.blocksDB.get(accountCache?.[accountCache.length - 1]))?.state.balance) ?? BigInt('0')
 
-    this.db[block.hash].push(block)
+    if (block.type === 'send') {
+      block.state = { balance: prevBalance - BigInt(block.amount) }
+    } else if (block.type === 'receive') {
+      const receivedBlock = await this.getBlock(block.block)
+
+      block.state = { balance: prevBalance + BigInt(receivedBlock.amount) }
+    }
+
+    accountCache.push(block.hash)
+
+    await this.accountsDB.put(block.sender, accountCache)
+    await this.blocksDB.put(block.hash, block)
+  }
+
+  getBlockCount () {
+    return this.blocksDB.getStats().entryCount.toString()
+  }
+
+  async getBlock (hash) {
+    return new Block(this.blocksDB.get(hash))
+  }
+
+  async getBalance (account) {
+    const chain = this.accountsDB.get(account) ?? []
+
+    if (chain.length === 0) return BigInt(0)
+    return this.blocksDB.get(chain[chain.length - 1]).state.balance
+  }
+
+  async getBlocks (account) {
+    const blocks = this.accountsDB.get(account) ?? []
+
+    return blocks 
   }
 }
