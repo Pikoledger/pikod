@@ -1,5 +1,5 @@
 const crypto = require('crypto')
-const tweetnacl = require('tweetnacl-blake2b')
+const tweetnacl = require('tweetnacl')
 
 module.exports = class Block {
   constructor (block) {

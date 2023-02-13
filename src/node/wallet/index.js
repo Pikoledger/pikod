@@ -1,4 +1,4 @@
-const tweetnacl = require('tweetnacl-blake2b')
+const tweetnacl = require('tweetnacl')
 
 module.exports = class Wallet {
   constructor (privateKey) {
