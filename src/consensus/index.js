@@ -1,6 +1,6 @@
 const events = require('events')
 
-const genesisBlock = require('../genesis')
+const genesisState = require('../genesis')
 
 module.exports = class Consensus extends events.EventEmitter {
   constructor (ledger) {
@@ -12,9 +12,7 @@ module.exports = class Consensus extends events.EventEmitter {
     this.validators = new Set()
 
     if (this.ledger.getBlockCount() === "0") {
-      this.ledger.blocksDB.put(genesisBlock.hash, genesisBlock).then(() => {
-        this.ledger.accountsDB.put(genesisBlock.sender, [ genesisBlock.hash ])
-      })
+      this.ledger.statesDB.put(genesisState.recipient, genesisState.toJSON())
     }
   }
 
