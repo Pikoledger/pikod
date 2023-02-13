@@ -1,6 +1,6 @@
 module.exports = class State {
   constructor (state) {
-    this.balance = state?.balance ?? BigInt('0')
+    this.balance = BigInt(state?.balance ?? 0)
   }
 
   toJSON () {
