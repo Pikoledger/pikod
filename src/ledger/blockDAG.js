@@ -1,6 +1,7 @@
 const lmdb = require('lmdb')
 
 const Block = require('./block')
+const State = require('./state')
 
 module.exports = class BlockDAG {
   constructor(dir) {
@@ -9,45 +10,60 @@ module.exports = class BlockDAG {
     })
 
     this.accountsDB = this.db.openDB("accounts")
+    this.statesDB = this.db.openDB("states")
+    this.indexesDB = this.db.openDB("indexes")
     this.blocksDB = this.db.openDB("blocks")
   }
 
   async isBlockValid (block) {
-    const accountCache = await this.getBlocks(block.sender)
+    const blocks = await this.getBlocks(block.sender)
 
-    if (typeof accountCache[accountCache.length - 1] === 'undefined') {
-      if (typeof block.chainedBlock !== undefined) return false
-    } else { 
-      if (accountCache[accountCache.length - 1] !== block.chainedBlock) return false
+    if (block.chainedBlock === null) {
+      if (blocks.length !== 0) return false
+    } else {
+      if (blocks[blocks.length - 1] !== block.chainedBlock) return false
     }
-
+    
     if (block.type === 'send') {
-      if (BigInt(block.amount) > BigInt(await this.getBalance(block.sender))) return false
+      const state = await this.getState(block.sender)
+
+      if (state.balance < BigInt(block.amount)) return false
     } else if (block.type === 'receive') {
-      const receivingBlock = await this.getBlock(block.block)
+      const receivedBlock = await this.getBlock(block.block) // An useless check bcs already checked technically by index but why not
+      if (receivedBlock === undefined) return false
 
-      if (receivingBlock.type !== 'send' || receivingBlock.recipient !== block.sender) return false
-    } else return false
-
-    return true
+      const index = await this.getIndex(block.sender)
+      if (!index.includes(block.block)) return false
+    }
   }
 
-  async addBlock (block) {
-    const accountCache = await this.getBlocks(block.sender)
-    const prevBalance = BigInt((await this.blocksDB.get(accountCache?.[accountCache.length - 1]))?.state.balance) ?? BigInt('0')
+  async addBlock (block) { // TODO: Find a way to make all operations in exact time or dont.
+    const blocks = await this.getBlocks(block.sender)
+    const state = await this.getState(block.sender)
 
     if (block.type === 'send') {
-      block.state = { balance: prevBalance - BigInt(block.amount) }
+      state.balance -= BigInt(block.amount)
+
+      const index = await this.getIndex(block.recipient)
+      index.push(block.hash)
+
+      await this.indexesDB.put(block.recipient, index)
     } else if (block.type === 'receive') {
       const receivedBlock = await this.getBlock(block.block)
 
-      block.state = { balance: prevBalance + BigInt(receivedBlock.amount) }
+      state.balance += BigInt(receivedBlock.amount)
+
+      let index = await this.getIndex(block.sender)
+      index = index.filter(hash => hash !== block.hash)
+      
+      await this.indexesDB.put(block.sender, index)
     }
 
-    accountCache.push(block.hash)
+    blocks.push(block.hash)
 
-    await this.accountsDB.put(block.sender, accountCache)
-    await this.blocksDB.put(block.hash, block)
+    await this.accountsDB.put(block.sender, blocks)
+    await this.blocksDB.put(block.hash, block.toJSON())
+    await this.statesDB.put(block.sender, state.toJSON())
   }
 
   getBlockCount () {
@@ -60,11 +76,12 @@ module.exports = class BlockDAG {
     return typeof fetchedBlock !== 'undefined' ? new Block(fetchedBlock) : undefined
   }
 
-  async getBalance (account) {
-    const chain = this.accountsDB.get(account) ?? []
+  async getIndex (account) {
+    return this.indexesDB.get(account) ?? []
+  }
 
-    if (chain.length === 0) return BigInt(0)
-    return this.blocksDB.get(chain[chain.length - 1]).state.balance
+  async getState (account) {
+    return new State(this.statesDB.get(account))
   }
 
   async getBlocks (account) {

@@ -19,7 +19,7 @@ module.exports = class Block {
 
     this.chainedBlock = block.chainedBlock
     this.signature = block.signature
-    this.confirmed = false
+    this.confirmed = block.confirmed ?? false
   }
 
   calculateHash () {
@@ -33,7 +33,7 @@ module.exports = class Block {
   async checkValidity () {
     if (!(this.type === 'send' || this.type === 'receive')) return false
     if (this.calculateHash() !== this.hash) return false
-
+    
     return tweetnacl.sign.detached.verify(Uint8Array.from(Buffer.from(this.hash, 'hex')), Uint8Array.from(Buffer.from(this.signature, 'hex')), Uint8Array.from(Buffer.from(this.sender, 'hex')))
   }
 
@@ -46,9 +46,9 @@ module.exports = class Block {
       amount: this?.amount,
       data: this?.data,
       block: this?.block,
-      chainedBlock: this?.chainedBlock,
+      chainedBlock: this.chainedBlock,
       signature: this.signature,
-      confirmed: true
+      confirmed: this.confirmed
     }
   }
 }
