@@ -47,6 +47,8 @@ module.exports = class jsonRPC {
           
             response.end(JSON.stringify(new Response(returnedData).toJSON()))
           } catch (err) {
+            console.log(err)
+            
             response.end(JSON.stringify(new Error(err.message).toJSON())) 
           }
         })
