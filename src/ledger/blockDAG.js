@@ -32,7 +32,7 @@ module.exports = class BlockDAG {
       const receivedBlock = await this.getBlock(block.block) // An useless check bcs already checked technically by index but why not
       if (receivedBlock === undefined) return false
 
-      const index = await this.getIndex(block.sender)
+      const index = await this.getIndexing(block.sender)
       if (!index.includes(block.block)) return false
     }
   }
@@ -44,7 +44,7 @@ module.exports = class BlockDAG {
     if (block.type === 'send') {
       state.balance -= BigInt(block.amount)
 
-      const index = await this.getIndex(block.recipient)
+      const index = await this.getIndexing(block.recipient)
       index.push(block.hash)
 
       await this.indexesDB.put(block.recipient, index)
@@ -53,7 +53,7 @@ module.exports = class BlockDAG {
 
       state.balance += BigInt(receivedBlock.amount)
 
-      let index = await this.getIndex(block.sender)
+      let index = await this.getIndexing(block.sender)
       index = index.filter(hash => hash !== block.hash)
       
       await this.indexesDB.put(block.sender, index)
@@ -76,7 +76,7 @@ module.exports = class BlockDAG {
     return typeof fetchedBlock !== 'undefined' ? new Block(fetchedBlock) : undefined
   }
 
-  async getIndex (account) {
+  async getIndexing (account) {
     return this.indexesDB.get(account) ?? []
   }
 

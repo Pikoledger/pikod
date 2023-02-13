@@ -5,7 +5,7 @@ module.exports = class State {
 
   toJSON () {
     return {
-      balance: this.balance
+      balance: this.balance.toString()
     }
   }
 }
