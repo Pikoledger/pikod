@@ -66,6 +66,14 @@ module.exports = class BlockDAG {
     await this.statesDB.put(block.sender, state.toJSON())
   }
 
+  async updateConfirmation (blockHash) {
+    const block = await this.getBlock(blockHash)
+
+    block.confirmed = true
+
+    await this.blocksDB.put(block.hash, block.toJSON())
+  }
+
   getBlockCount () {
     return this.blocksDB.getStats().entryCount.toString()
   }

@@ -11,21 +11,45 @@ module.exports = class Consensus extends events.EventEmitter {
     this.nodeAccount = undefined
     this.validators = new Set()
 
+    this.activeElections = {}
+
     if (this.ledger.getBlockCount() === "0") {
       this.ledger.statesDB.put(genesisState.recipient, genesisState.toJSON())
     }
+  }
+
+  declareSelf (account) {
+    this.nodeAccount = account
   }
 
   async discoverBlock (block) {
     if (await block.checkValidity() === false) return
     if (await this.ledger.isBlockValid(block) === false) return
 
-    block.confirmed = true
-
     await this.ledger.addBlock(block)
+
+    if (this.getPower(this.nodeAccount) > BigInt(0)) {
+      this.emit('vote', block.hash)
+    }
   }
-  
-  declareSelf (account) {
-    this.nodeAccount = account
+
+  async submitVoting (vote) {
+    if (typeof this.activeElections?.[vote.hash] === 'undefined') {
+      this.activeElections[vote.hash] = BigInt(0)
+    }
+
+    this.activeElections[vote.hash] += await this.getPower(vote.voter)
+
+    if (await this.getNetworkPower() / 2 <= this.activeElections[vote.hash]) {
+      await this.ledger.updateConfirmation(vote.hash)
+    }
+  }
+
+  async getNetworkPower () { // possible optimizations like do a constant and update it only when mine block
+    return BigInt("1") // wen dynamic
+  }
+
+  async getPower (address) {
+    return BigInt("1") // wen dynamic
   }
 }
