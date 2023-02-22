@@ -66,8 +66,8 @@ module.exports = class BlockDAG {
     await this.statesDB.put(block.sender, state.toJSON())
   }
 
-  async updateConfirmation (blockHash) {
-    const block = await this.getBlock(blockHash)
+  async confirmBlock (hash) {
+    const block = await this.getBlock(hash)
 
     block.confirmed = true
 

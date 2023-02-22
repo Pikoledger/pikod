@@ -17,6 +17,10 @@ module.exports = class Block {
       this.block = block.block
     }
 
+    if (this.type === 'mine') {
+      this.nonce = block.nonce
+    }
+
     this.chainedBlock = block.chainedBlock
     this.signature = block.signature
     this.confirmed = block.confirmed ?? false
@@ -31,8 +35,9 @@ module.exports = class Block {
   }
 
   async checkValidity () {
-    if (!(this.type === 'send' || this.type === 'receive')) return false
+    if (![ "send", "receive", "mine"].includes(this.type)) return false
     if (this.calculateHash() !== this.hash) return false
+    if (this.type === 'mine' && this.hash.substring(0, 2) !== '00') return false // TODO: Implement a better diff calculator etc.
     
     return tweetnacl.sign.detached.verify(Uint8Array.from(Buffer.from(this.hash, 'hex')), Uint8Array.from(Buffer.from(this.signature, 'hex')), Uint8Array.from(Buffer.from(this.sender, 'hex')))
   }
@@ -46,6 +51,7 @@ module.exports = class Block {
       amount: this?.amount,
       data: this?.data,
       block: this?.block,
+      nonce: this?.nonce,
       chainedBlock: this.chainedBlock,
       signature: this.signature,
       confirmed: this.confirmed
