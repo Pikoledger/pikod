@@ -57,6 +57,8 @@ module.exports = class BlockDAG {
       index = index.filter(hash => hash !== block.hash)
       
       await this.indexesDB.put(block.sender, index)
+    } else if (block.type === 'mine') {
+      state.minerScore += BigInt('1') // TODO: Based on diff
     }
 
     blocks.push(block.hash)
