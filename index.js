@@ -1,8 +1,8 @@
 const BlockDAG = require('./src/ledger/blockDAG')
 const Consensus = require('./src/consensus')
 const Network = require('./src/networking')
-const Wallet = require('./src/node/wallet')
 const Logger = require('./src/node/logger')
+const Wallet = require('./src/node/wallet')
 
 const config = require('./config.json')
 const logger = new Logger()
@@ -14,7 +14,7 @@ logger.reportInfo(`Consensus is listening for agreements.`)
 const networking = new Network(consensus)
 logger.reportInfo(`Networking is welcoming the world.`)
 
-const wallet = config.wallet.privateKey === "" ? Wallet.createOne() : new Wallet(config.wallet.privateKey)
+const wallet = Wallet.fromPath('./ledger/wallet.json')
 networking.joinNetwork(wallet)
 logger.reportInfo(`Now everyone knows us as ${wallet.address}.`)
 

@@ -1,20 +1,19 @@
-const tweetnacl = require('tweetnacl')
+const fs = require("fs")
 
-module.exports = class Wallet {
-  constructor (privateKey) {
-    this._keyPair = tweetnacl.sign.keyPair.fromSecretKey(Uint8Array.from(Buffer.from(privateKey, 'hex')))
+const Wallet = require('./src/wallet')
 
-    this.address = Buffer.from(this._keyPair.publicKey).toString('hex')
-    this.privateKey = privateKey
-  }
+module.exports = class Manager {
+  static fromPath (path) {
+    try {
+      const wallet = fs.readFileSync(path, { encoding: "utf-8" })
 
-  static createOne () {
-    const keyPair = tweetnacl.sign.keyPair()
+      return new Wallet(JSON.parse(wallet).privateKey)
+    } catch (err) {
+      const newWallet = Wallet.createOne()
+  
+      fs.writeFileSync(path, JSON.stringify(newWallet.toJSON()), { encoding: "utf-8" })
 
-    return new Wallet(Buffer.from(keyPair.secretKey).toString('hex'))
-  }
-
-  sign (data) {
-    return nacl.sign.detached(Uint8Array.from(Buffer.from(data, 'hex')), this._keyPair.secretKey)
+      return newWallet
+    }
   }
 }
