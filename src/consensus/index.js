@@ -45,11 +45,11 @@ module.exports = class Consensus extends events.EventEmitter {
     }
   }
 
-  async getNetworkPower () { // possible optimizations like do a constant and update it only when mine block
+  async getMinerWeight () { // possible optimizations like do a constant and update it only when mine block
     return BigInt("1") // wen dynamic
   }
 
-  async getPower (address) {
-    return BigInt("1") // wen dynamic
+  async getMinerScore (address) {
+    return (await this.ledger.getState(address)).minerScore
   }
 }

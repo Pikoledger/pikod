@@ -13,6 +13,7 @@ module.exports = class BlockDAG {
     this.statesDB = this.db.openDB("states")
     this.indexesDB = this.db.openDB("indexes")
     this.blocksDB = this.db.openDB("blocks")
+    this.networkDB = this.db.openDB("network")
   }
 
   async isBlockValid (block) {
