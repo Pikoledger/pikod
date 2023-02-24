@@ -13,7 +13,7 @@ module.exports = class BlockDAG {
     this.statesDB = this.db.openDB("states")
     this.indexesDB = this.db.openDB("indexes")
     this.blocksDB = this.db.openDB("blocks")
-    this.networkDB = this.db.openDB("network")
+    this.consensusDB = this.db.openDB("stats") // TODO: Seperate dd
   }
 
   async isBlockValid (block) {
@@ -59,7 +59,11 @@ module.exports = class BlockDAG {
       
       await this.indexesDB.put(block.sender, index)
     } else if (block.type === 'mine') {
-      state.minerScore += BigInt('1') // TODO: Based on diff
+      const earnedPoints = BigInt('1') // TODO: Based on diff(Like a share)
+    
+      state.minerScore += earnedPoints
+
+      await this.statsDB.put('dagWeight', (await this.getDAGWeight()) + earnedPoints)
     }
 
     blocks.push(block.hash)
@@ -77,7 +81,11 @@ module.exports = class BlockDAG {
     await this.blocksDB.put(block.hash, block.toJSON())
   }
 
-  getBlockCount () {
+  async getDAGWeight () {
+    return this.statsDB.get('dagWeight') ?? BigInt(0)
+  }
+
+  async getBlockCount () {
     return this.blocksDB.getStats().entryCount.toString()
   }
 

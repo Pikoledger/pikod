@@ -40,12 +40,12 @@ module.exports = class Consensus extends events.EventEmitter {
 
     this.activeElections[vote.hash] += await this.getPower(vote.voter)
 
-    if (await this.getNetworkPower() / 2 <= this.activeElections[vote.hash]) {
+    if (await this.ledger.getDAGWeight() / 2 <= this.activeElections[vote.hash]) {
       await this.ledger.updateConfirmation(vote.hash)
     }
   }
 
-  async getMinerWeight () { // possible optimizations like do a constant and update it only when mine block
+  async getNetworkWeight () { // possible optimizations like do a constant and update it only when mine block
     return BigInt("1") // wen dynamic
   }
 
