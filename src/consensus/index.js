@@ -1,12 +1,12 @@
-const events = require('events')
-
 const genesisState = require('../genesis')
 
-module.exports = class Consensus extends events.EventEmitter {
-  constructor (blockDAG, storage) {
+const { EventEmitter } = require('events')
+
+module.exports = class Consensus extends EventEmitter {
+  constructor (ledger, storage) {
     super()
 
-    this.blockDAG = blockDAG
+    this.ledger = ledger
     this.storage = storage
 
     this.nodeAccount = undefined
@@ -20,11 +20,11 @@ module.exports = class Consensus extends events.EventEmitter {
   }
 
   registerLedger () {
-    if (this.blockDAG.getBlockCount() === '0') {
-      this.blockDAG.statesDB.putSync(genesisState.recipient, genesisState.toJSON())
+    if (this.ledger.getBlockCount() === '0') {
+      this.ledger.statesDB.putSync(genesisState.recipient, genesisState.toJSON())
     }
 
-    this.blockDAG.on('blockConfirmation', async (block) => {
+    this.ledger.on('blockConfirmation', async (block) => {
       if (block.type === 'mine') {
         await this.storage.put('scoreWeight', (await this.getScoreWeight()) + BigInt("1"))
       }
@@ -33,9 +33,9 @@ module.exports = class Consensus extends events.EventEmitter {
 
   async discoverBlock (block) {
     if (await block.checkValidity() === false) return
-    if (await this.blockDAG.isBlockValid(block) === false) return
+    if (await this.ledger.isBlockValid(block) === false) return
 
-    await this.blockDAG.addBlock(block)
+    await this.ledger.addBlock(block)
 
     if (this.getPower(this.nodeAccount) > BigInt(0)) {
       this.emit('vote', block.hash)
@@ -50,7 +50,7 @@ module.exports = class Consensus extends events.EventEmitter {
     this.activeElections[vote.hash] += await this.getScore(vote.voter)
 
     if (await this.getScoreWeight() / 2 <= this.activeElections[vote.hash]) {
-      await this.blockDAG.updateConfirmation(vote.hash)
+      await this.ledger.updateConfirmation(vote.hash)
     }
   }
 
@@ -59,6 +59,6 @@ module.exports = class Consensus extends events.EventEmitter {
   }
 
   async getScore (address) {
-    return (await this.blockDAG.getState(address)).minerScore
+    return (await this.ledger.getState(address)).minerScore
   }
 }
