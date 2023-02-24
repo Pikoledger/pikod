@@ -14,6 +14,6 @@ const networking = new Network(consensus)
 const wallet = Wallet.fromPath('./storage/wallet.json')
 networking.joinNetwork(wallet)
 
-const jsonRPC = new (require('./src/node/api/jsonRPC'))(ledger, networking, config.node.rpcPort)
+const jsonRPC = new (require('./src/node/api/jsonRPC'))(config.node.rpcPort, { ledger, consensus, networking })
 
 console.log('Piko node ready!')

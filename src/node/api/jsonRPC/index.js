@@ -5,8 +5,9 @@ const Response = require('./templates/response')
 const Error = require('./templates/error')
 
 module.exports = class jsonRPC {
-  constructor (ledger, networking, port) {
+  constructor (port, { ledger, consensus, networking }) {
     this.ledger = ledger
+    this.consensus = consensus
     this.networking = networking
 
     this.methods = new Map()
@@ -42,6 +43,7 @@ module.exports = class jsonRPC {
 
             const returnedData = await (this.methods.get(call.method)).execute(call.args, {
               ledger: this.ledger,
+              consensus: this.consensus,
               networking: this.networking
             })
 
