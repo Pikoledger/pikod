@@ -3,16 +3,15 @@ const events = require('events')
 const genesisState = require('../genesis')
 
 module.exports = class Consensus extends events.EventEmitter {
-  constructor (ledger, database) {
+  constructor (ledger, storage) {
     super()
 
     this.ledger = ledger
-    this.database = database
+    this.storage = storage
 
     this.nodeAccount = undefined
-    this.validators = new Set()
 
-    this.activeElections = {}
+    this.activeElections = {} // TODO: Store it on storage instead of cache
 
     if (this.ledger.getBlockCount() === '0') {
       this.ledger.statesDB.put(genesisState.recipient, genesisState.toJSON())
