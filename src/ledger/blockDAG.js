@@ -64,7 +64,7 @@ module.exports = class BlockDAG extends EventEmitter {
 
     if (block.type === 'send') {
       const index = await this.getIndexing(block.recipient)
-      
+
       index.push(block.hash)
 
       await this.indexesDB.put(block.recipient, index)
@@ -75,7 +75,7 @@ module.exports = class BlockDAG extends EventEmitter {
     } else if (block.type === 'mine') {
       const earnedPoints = BigInt('1') // TODO: Based on diff(Like a share)
 
-      state.minerScore += earnedPoints // TODO: Only update after confirmation(also needs changes in consensus.js like we can emit updateScore)
+      state.minerScore += earnedPoints
     }
 
     block.confirmed = true
