@@ -37,12 +37,34 @@ module.exports = class BlockDAG extends EventEmitter {
 
   async addBlock (block) { // TODO: Find a way to make all operations in exact time or dont.
     const blocks = await this.getBlocks(block.sender)
+
+    if (block.type === 'send') {
+      const state = await this.getState(block.sender)
+
+      state.balance -= BigInt(block.amount)
+
+      await this.statesDB.put(block.sender, state.toJSON())
+    } else if (block.type === 'receive') {
+      let index = await this.getIndexing(block.sender)
+
+      index = index.filter(hash => hash !== block.hash)
+
+      await this.indexesDB.put(block.sender, index)
+    }
+
+    blocks.push(block.hash)
+
+    await this.accountsDB.put(block.sender, blocks)
+    await this.blocksDB.put(block.hash, block.toJSON())
+  }
+
+  async confirmBlock (hash) {
+    const block = await this.getBlock(hash)
     const state = await this.getState(block.sender)
 
     if (block.type === 'send') {
-      state.balance -= BigInt(block.amount)
-
       const index = await this.getIndexing(block.recipient)
+      
       index.push(block.hash)
 
       await this.indexesDB.put(block.recipient, index)
@@ -50,32 +72,16 @@ module.exports = class BlockDAG extends EventEmitter {
       const receivedBlock = await this.getBlock(block.block)
 
       state.balance += BigInt(receivedBlock.amount)
-
-      let index = await this.getIndexing(block.sender)
-      index = index.filter(hash => hash !== block.hash)
-
-      await this.indexesDB.put(block.sender, index)
     } else if (block.type === 'mine') {
       const earnedPoints = BigInt('1') // TODO: Based on diff(Like a share)
 
       state.minerScore += earnedPoints // TODO: Only update after confirmation(also needs changes in consensus.js like we can emit updateScore)
     }
 
-    blocks.push(block.hash)
-
-    await this.accountsDB.put(block.sender, blocks)
-    await this.blocksDB.put(block.hash, block.toJSON())
-    await this.statesDB.put(block.sender, state.toJSON())
-  }
-
-  async confirmBlock (hash) {
-    const block = await this.getBlock(hash)
-
     block.confirmed = true
 
     await this.blocksDB.put(block.hash, block.toJSON())
-
-    this.emit('blockConfirmation', block)
+    await this.statesDB.put(block.sender, state.toJSON())
   }
 
   async getBlockCount () {
