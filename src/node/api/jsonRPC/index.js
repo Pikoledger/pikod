@@ -26,34 +26,34 @@ module.exports = class jsonRPC {
 
   listenRequests (port) {
     http.createServer((request, response) => {
-      if (request.method === "POST") {
+      if (request.method === 'POST') {
         let receivedData = Buffer.allocUnsafe(0)
 
-        request.on("data", function (chunk) {
-          receivedData = Buffer.concat([ receivedData, chunk ])
+        request.on('data', function (chunk) {
+          receivedData = Buffer.concat([receivedData, chunk])
         })
 
-        request.on("end", async () => {
-          response.writeHead(200, { "Content-Type": "application/json" })
+        request.on('end', async () => {
+          response.writeHead(200, { 'Content-Type': 'application/json' })
 
           try {
             const call = JSON.parse(receivedData)
-            if (!this.methods.has(call.method)) return response.end(JSON.stringify(new Error("Unknown method").toJSON()))
+            if (!this.methods.has(call.method)) return response.end(JSON.stringify(new Error('Unknown method').toJSON()))
 
             const returnedData = await (this.methods.get(call.method)).execute(call.args, {
               ledger: this.ledger,
               networking: this.networking
             })
-          
+
             response.end(JSON.stringify(new Response(returnedData).toJSON()))
           } catch (err) {
             console.log(err)
-            
-            response.end(JSON.stringify(new Error(err.message).toJSON())) 
+
+            response.end(JSON.stringify(new Error(err.message).toJSON()))
           }
         })
       } else {
-        response.end(JSON.stringify(new Error("Only POST requests are allowed").toJSON())) 
+        response.end(JSON.stringify(new Error('Only POST requests are allowed').toJSON()))
       }
     }).listen(port)
   }

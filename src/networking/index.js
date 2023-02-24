@@ -1,7 +1,7 @@
 const Vote = require('./vote')
 
 module.exports = class Network {
-  constructor(consensus) {
+  constructor (consensus) {
     this.consensus = consensus
 
     this.consensus.on('vote', async (block) => {
@@ -11,7 +11,7 @@ module.exports = class Network {
       }))
     })
   }
-  
+
   joinNetwork (wallet) {
     this.consensus.declareSelf(wallet.address)
   }

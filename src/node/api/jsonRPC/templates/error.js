@@ -5,8 +5,8 @@ module.exports = class Error {
 
   toJSON () {
     return {
-      "success": false,
-      "error": this.errorReason
+      success: false,
+      error: this.errorReason
     }
   }
 }

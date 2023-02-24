@@ -5,8 +5,8 @@ module.exports = class Response {
 
   toJSON () {
     return {
-      "success": true,
-      "result": this.returnedData
+      success: true,
+      result: this.returnedData
     }
   }
 }

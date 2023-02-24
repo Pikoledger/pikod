@@ -2,11 +2,11 @@ const Block = require('./block')
 const State = require('./state')
 
 module.exports = class BlockDAG {
-  constructor(database) {
-    this.accountsDB = database.accountsDB
-    this.statesDB = database.statesDB
-    this.indexesDB = database.indexesDB
-    this.blocksDB = database.blocksDB
+  constructor (storage) {
+    this.accountsDB = storage.accounts
+    this.statesDB = storage.states
+    this.indexesDB = storage.indexes
+    this.blocksDB = storage.blocks
   }
 
   async isBlockValid (block) {
@@ -17,7 +17,7 @@ module.exports = class BlockDAG {
     } else {
       if (blocks[blocks.length - 1] !== block.chainedBlock) return false
     }
-    
+
     if (block.type === 'send') {
       const state = await this.getState(block.sender)
 
@@ -49,11 +49,11 @@ module.exports = class BlockDAG {
 
       let index = await this.getIndexing(block.sender)
       index = index.filter(hash => hash !== block.hash)
-      
+
       await this.indexesDB.put(block.sender, index)
     } else if (block.type === 'mine') {
       const earnedPoints = BigInt('1') // TODO: Based on diff(Like a share)
-    
+
       state.minerScore += earnedPoints
     }
 
@@ -93,6 +93,6 @@ module.exports = class BlockDAG {
   async getBlocks (account) {
     const blocks = this.accountsDB.get(account) ?? []
 
-    return blocks 
+    return blocks
   }
 }

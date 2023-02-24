@@ -1,4 +1,4 @@
-const Database = require('./src/node/database')
+const Database = require('./src/node/storage')
 const BlockDAG = require('./src/ledger/blockDAG')
 const Consensus = require('./src/consensus')
 const Network = require('./src/networking')
@@ -8,12 +8,12 @@ const config = require('./config.json')
 const database = new Database('./ledger/ledger.ldb')
 
 const ledger = new BlockDAG({
-  accountsDB: database.openHeader("accounts"),
-  statesDB: database.openHeader("states"),
-  indexesDB: database.openHeader("indexes"),
-  blocksDB: database.openHeader("blocks")
+  accounts: database.openHeader('accounts'),
+  states: database.openHeader('states'),
+  indexes: database.openHeader('indexes'),
+  blocks: database.openHeader('blocks')
 })
-const consensus = new Consensus(ledger)
+const consensus = new Consensus(ledger, database.openHeader('network'))
 const networking = new Network(consensus)
 
 const wallet = Wallet.fromPath('./ledger/wallet.json')

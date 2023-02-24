@@ -16,7 +16,7 @@ module.exports = class Wallet {
   }
 
   sign (data) {
-    return nacl.sign.detached(Uint8Array.from(Buffer.from(data, 'hex')), this._keyPair.secretKey)
+    return tweetnacl.sign.detached(Uint8Array.from(Buffer.from(data, 'hex')), this._keyPair.secretKey)
   }
 
   toJSON () {

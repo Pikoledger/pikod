@@ -3,17 +3,18 @@ const events = require('events')
 const genesisState = require('../genesis')
 
 module.exports = class Consensus extends events.EventEmitter {
-  constructor (ledger) {
+  constructor (ledger, database) {
     super()
 
     this.ledger = ledger
+    this.database = database
 
     this.nodeAccount = undefined
     this.validators = new Set()
 
     this.activeElections = {}
 
-    if (this.ledger.getBlockCount() === "0") {
+    if (this.ledger.getBlockCount() === '0') {
       this.ledger.statesDB.put(genesisState.recipient, genesisState.toJSON())
     }
   }
@@ -46,7 +47,7 @@ module.exports = class Consensus extends events.EventEmitter {
   }
 
   async getNetworkWeight () { // possible optimizations like do a constant and update it only when mine block
-    return BigInt("1") // wen dynamic
+    return BigInt('1') // wen dynamic
   }
 
   async getMinerScore (address) {
