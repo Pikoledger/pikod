@@ -76,6 +76,8 @@ module.exports = class BlockDAG extends EventEmitter {
       const earnedPoints = BigInt('1') // TODO: Based on diff(Like a share)
 
       state.minerScore += earnedPoints
+
+      this.emit('scoreMintage', earnedPoints)
     }
 
     block.confirmed = true

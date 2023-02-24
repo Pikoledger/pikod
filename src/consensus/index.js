@@ -24,10 +24,8 @@ module.exports = class Consensus extends EventEmitter {
       this.ledger.statesDB.putSync(genesisState.recipient, genesisState.toJSON())
     }
 
-    this.ledger.on('blockConfirmation', async (block) => {
-      if (block.type === 'mine') {
-        await this.storage.put('scoreWeight', (await this.getScoreWeight()) + BigInt("1"))
-      }
+    this.ledger.on('scoreMintage', async (amount) => {
+      await this.storage.put('scoreWeight', (await this.getScoreWeight()) + amount)
     })
   }
 
