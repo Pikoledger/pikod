@@ -7,7 +7,12 @@ const Wallet = require('./src/node/wallet')
 const config = require('./config.json')
 const database = new Database('./ledger/ledger.ldb')
 
-const ledger = new BlockDAG('./ledger')
+const ledger = new BlockDAG({
+  accountsDB: database.openHeader("accounts"),
+  statesDB: database.openHeader("states"),
+  indexesDB: database.openHeader("indexes"),
+  blocksDB: database.openHeader("blocks")
+})
 const consensus = new Consensus(ledger)
 const networking = new Network(consensus)
 

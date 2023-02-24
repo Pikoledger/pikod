@@ -1,19 +1,12 @@
-const lmdb = require('lmdb')
-
 const Block = require('./block')
 const State = require('./state')
 
 module.exports = class BlockDAG {
-  constructor(dir) {
-    this.db = lmdb.open({
-      path: `${dir}/ledger.ldb`
-    })
-
-    this.accountsDB = this.db.openDB("accounts")
-    this.statesDB = this.db.openDB("states")
-    this.indexesDB = this.db.openDB("indexes")
-    this.blocksDB = this.db.openDB("blocks")
-    this.consensusDB = this.db.openDB("stats") // TODO: Seperate dd
+  constructor(database) {
+    this.accountsDB = database.accountsDB
+    this.statesDB = database.statesDB
+    this.indexesDB = database.indexesDB
+    this.blocksDB = database.blocksDB
   }
 
   async isBlockValid (block) {
@@ -62,8 +55,6 @@ module.exports = class BlockDAG {
       const earnedPoints = BigInt('1') // TODO: Based on diff(Like a share)
     
       state.minerScore += earnedPoints
-
-      await this.statsDB.put('dagWeight', (await this.getDAGWeight()) + earnedPoints)
     }
 
     blocks.push(block.hash)
@@ -79,10 +70,6 @@ module.exports = class BlockDAG {
     block.confirmed = true
 
     await this.blocksDB.put(block.hash, block.toJSON())
-  }
-
-  async getDAGWeight () {
-    return this.statsDB.get('dagWeight') ?? BigInt(0)
   }
 
   async getBlockCount () {
