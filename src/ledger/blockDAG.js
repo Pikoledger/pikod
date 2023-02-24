@@ -1,8 +1,12 @@
 const Block = require('./block')
 const State = require('./state')
 
-module.exports = class BlockDAG {
+const { EventEmitter } = require('events')
+
+module.exports = class BlockDAG extends EventEmitter {
   constructor (storage) {
+    super()
+    
     this.accountsDB = storage.accounts
     this.statesDB = storage.states
     this.indexesDB = storage.indexes
@@ -54,7 +58,7 @@ module.exports = class BlockDAG {
     } else if (block.type === 'mine') {
       const earnedPoints = BigInt('1') // TODO: Based on diff(Like a share)
 
-      state.minerScore += earnedPoints
+      state.minerScore += earnedPoints // TODO: Only update after confirmation(also needs changes in consensus.js like we can emit updateScore)
     }
 
     blocks.push(block.hash)
@@ -70,6 +74,8 @@ module.exports = class BlockDAG {
     block.confirmed = true
 
     await this.blocksDB.put(block.hash, block.toJSON())
+
+    this.emit('blockConfirmation', block)
   }
 
   async getBlockCount () {

@@ -3,30 +3,39 @@ const events = require('events')
 const genesisState = require('../genesis')
 
 module.exports = class Consensus extends events.EventEmitter {
-  constructor (ledger, storage) {
+  constructor (blockDAG, storage) {
     super()
 
-    this.ledger = ledger
+    this.blockDAG = blockDAG
     this.storage = storage
 
     this.nodeAccount = undefined
-
     this.activeElections = {} // TODO: Store it on storage instead of cache
 
-    if (this.ledger.getBlockCount() === '0') {
-      this.ledger.statesDB.put(genesisState.recipient, genesisState.toJSON())
-    }
+    this.registerLedger()
   }
 
   declareSelf (account) {
     this.nodeAccount = account
   }
 
+  registerLedger () {
+    if (this.blockDAG.getBlockCount() === '0') {
+      this.blockDAG.statesDB.putSync(genesisState.recipient, genesisState.toJSON())
+    }
+
+    this.blockDAG.on('blockConfirmation', async (block) => {
+      if (block.type === 'mine') {
+        await this.storage.put('scoreWeight', (await this.getScoreWeight()) + BigInt("1"))
+      }
+    })
+  }
+
   async discoverBlock (block) {
     if (await block.checkValidity() === false) return
-    if (await this.ledger.isBlockValid(block) === false) return
+    if (await this.blockDAG.isBlockValid(block) === false) return
 
-    await this.ledger.addBlock(block)
+    await this.blockDAG.addBlock(block)
 
     if (this.getPower(this.nodeAccount) > BigInt(0)) {
       this.emit('vote', block.hash)
@@ -38,18 +47,18 @@ module.exports = class Consensus extends events.EventEmitter {
       this.activeElections[vote.hash] = BigInt(0)
     }
 
-    this.activeElections[vote.hash] += await this.getPower(vote.voter)
+    this.activeElections[vote.hash] += await this.getScore(vote.voter)
 
-    if (await this.ledger.getDAGWeight() / 2 <= this.activeElections[vote.hash]) {
-      await this.ledger.updateConfirmation(vote.hash)
+    if (await this.getScoreWeight() / 2 <= this.activeElections[vote.hash]) {
+      await this.blockDAG.updateConfirmation(vote.hash)
     }
   }
 
-  async getNetworkWeight () { // possible optimizations like do a constant and update it only when mine block
-    return BigInt('1') // wen dynamic
+  async getScoreWeight () {
+    return BigInt(this.storage.get('scoreWeight') ?? 0)
   }
 
-  async getMinerScore (address) {
-    return (await this.ledger.getState(address)).minerScore
+  async getScore (address) {
+    return (await this.blockDAG.getState(address)).minerScore
   }
 }
