@@ -1,7 +1,11 @@
 const Vote = require('./vote')
 
-module.exports = class Network {
+const { EventEmitter } = require('events')
+
+module.exports = class Network extends EventEmitter {
   constructor (consensus) {
+    super()
+    
     this.consensus = consensus
 
     this.consensus.on('vote', async (block) => {
