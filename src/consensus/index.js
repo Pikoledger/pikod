@@ -35,7 +35,7 @@ module.exports = class Consensus extends EventEmitter {
 
     await this.ledger.addBlock(block)
 
-    if (this.getPower(this.nodeAccount) > BigInt(0)) {
+    if (await this.getScore(this.nodeAccount) > BigInt(0)) {
       this.emit('vote', block.hash)
     }
   }
@@ -47,8 +47,8 @@ module.exports = class Consensus extends EventEmitter {
 
     this.activeElections[vote.hash] += await this.getScore(vote.voter)
 
-    if (await this.getScoreWeight() / 2 <= this.activeElections[vote.hash]) {
-      await this.ledger.updateConfirmation(vote.hash)
+    if (this.activeElections[vote.hash] >= await this.getScoreWeight() / 2n) {
+      await this.ledger.confirmBlock(vote.hash)
     }
   }
 
