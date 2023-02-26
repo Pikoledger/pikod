@@ -2,7 +2,7 @@ const Vote = require('./vote')
 
 const { EventEmitter } = require('events')
 
-module.exports = class Network extends EventEmitter {
+module.exports = class Networking extends EventEmitter {
   constructor (consensus) {
     super()
     
