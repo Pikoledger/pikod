@@ -19,9 +19,9 @@ module.exports = class Consensus extends EventEmitter {
     this.nodeAccount = account
   }
 
-  registerLedger () {
-    if (this.ledger.getBlockCount() === '0') {
-      this.ledger.statesDB.put(genesisState.recipient, genesisState.toJSON())
+  async registerLedger () {
+    if (await this.ledger.getBlockCount() === '0') {
+      await this.ledger.statesDB.put(genesisState.recipient, genesisState.toJSON())
     }
 
     this.ledger.on('scoreMintage', async (amount) => {
