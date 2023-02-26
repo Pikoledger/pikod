@@ -1,4 +1,3 @@
-
 const State = require('./ledger/state')
 
 const genesisState = new State({
@@ -6,6 +5,6 @@ const genesisState = new State({
   minerScore: BigInt('1')
 })
 
-genesisState.recipient = '03435f2e5f69861416f462accd9046477818d44b493299c4db92bc5150447b72'
+genesisState.recipient = 'a44cc8ef3c0cf356fb5150649375be56071bb8592f5b2264b006baa3641acacb'
 
 module.exports = genesisState

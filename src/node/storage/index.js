@@ -1,6 +1,8 @@
 const lmdb = require('lmdb')
 
-module.exports = class Database {
+const Database = require('./database')
+
+module.exports = class Storage {
   constructor (path) {
     this.db = lmdb.open({
       path: path
@@ -8,6 +10,6 @@ module.exports = class Database {
   }
 
   openDB (identifier) {
-    return this.db.openDB(identifier)
+    return new Database(this.db.openDB(identifier))
   }
 }
