@@ -21,7 +21,7 @@ module.exports = class Consensus extends EventEmitter {
 
   registerLedger () {
     if (this.ledger.getBlockCount() === '0') {
-      this.ledger.statesDB.putSync(genesisState.recipient, genesisState.toJSON())
+      this.ledger.statesDB.put(genesisState.recipient, genesisState.toJSON())
     }
 
     this.ledger.on('scoreMintage', async (amount) => {
@@ -53,7 +53,7 @@ module.exports = class Consensus extends EventEmitter {
   }
 
   async getScoreWeight () {
-    return BigInt(this.storage.get('scoreWeight') ?? 0)
+    return BigInt(await this.storage.get('scoreWeight') ?? 0)
   }
 
   async getScore (address) {

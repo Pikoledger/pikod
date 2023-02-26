@@ -7,8 +7,13 @@ const Wallet = require('./src/node/wallet')
 const config = require('./config.json')
 const storage = new Storage('./storage/ledger.db')
 
-const ledger = new BlockDAG({ accounts: storage.openHeader('accounts'), states: storage.openHeader('states'), indexes: storage.openHeader('indexes'), blocks: storage.openHeader('blocks') })
-const consensus = new Consensus(ledger, storage.openHeader('consensus'))
+const ledger = new BlockDAG({ 
+  accounts: storage.openDB('accounts'),
+  states: storage.openDB('states'),
+  indexes: storage.openDB('indexes'),
+  blocks: storage.openDB('blocks')
+})
+const consensus = new Consensus(ledger, storage.openDB('consensus'))
 const networking = new Network(consensus)
 
 const wallet = Wallet.fromPath('./storage/wallet.json')

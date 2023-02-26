@@ -7,10 +7,10 @@ module.exports = class BlockDAG extends EventEmitter {
   constructor (storage) {
     super()
     
-    this.accountsDB = storage.accounts
-    this.statesDB = storage.states
-    this.indexesDB = storage.indexes
-    this.blocksDB = storage.blocks
+    this.accountsDB = storage['accounts']
+    this.statesDB = storage['states']
+    this.indexesDB = storage['indexes']
+    this.blocksDB = storage['blocks']
   }
 
   async isBlockValid (block) {
@@ -87,25 +87,25 @@ module.exports = class BlockDAG extends EventEmitter {
   }
 
   async getBlockCount () {
-    return this.blocksDB.getStats().entryCount.toString()
+    return await this.blocksDB.getLength()
   }
 
   async getBlock (hash) {
-    const fetchedBlock = this.blocksDB.get(hash)
+    const fetchedBlock = await this.blocksDB.get(hash)
 
     return typeof fetchedBlock !== 'undefined' ? new Block(fetchedBlock) : undefined
   }
 
   async getIndexing (account) {
-    return this.indexesDB.get(account) ?? []
+    return await this.indexesDB.get(account) ?? []
   }
 
   async getState (account) {
-    return new State(this.statesDB.get(account))
+    return new State(await this.statesDB.get(account))
   }
 
   async getBlocks (account) {
-    const blocks = this.accountsDB.get(account) ?? []
+    const blocks = await this.accountsDB.get(account) ?? []
 
     return blocks
   }
