@@ -1,8 +1,6 @@
 {
   "node": {
+    "peeringPort": 6942,
     "rpcPort": 3645
-  },
-  "wallet": {
-    "privateKey": "bd1c1fddba445c013b2f054293b898f6decfc407a632da3111d4e4526706013003435f2e5f69861416f462accd9046477818d44b493299c4db92bc5150447b72"
   }
 }

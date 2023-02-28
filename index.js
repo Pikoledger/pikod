@@ -14,7 +14,7 @@ const ledger = new BlockDAG({
   blocks: storage.openDB('blocks')
 })
 const consensus = new Consensus(ledger, storage.openDB('consensus'))
-const networking = new Network(consensus)
+const networking = new Network(config.node.peeringPort, consensus)
 
 const wallet = Wallet.fromPath('./storage/wallet.json')
 networking.joinNetwork(wallet)
