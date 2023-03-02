@@ -1,6 +1,6 @@
+const Socket = require('./src/socket')
 const Vote = require('./vote')
 
-const dgram = require('dgram')
 const { EventEmitter } = require('events')
 
 module.exports = class Networking extends EventEmitter {
@@ -8,16 +8,14 @@ module.exports = class Networking extends EventEmitter {
     super()
     
     this.consensus = consensus
-    this.socket = dgram.createSocket('udp4');
 
+    this.socket = new Socket(port)
     this.consensus.on('vote', async (block) => {
       await this.consensus.submitVoting(new Vote({
         voter: this.consensus.nodeAccount,
         hash: block
       }))
     })
-
-    this.socket.bind(port)
   }
 
   joinNetwork (wallet) {
