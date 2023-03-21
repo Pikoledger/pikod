@@ -1,5 +1,6 @@
-const dgram = require('dgram')
+const calls = require('./calls')
 
+const dgram = require('dgram')
 const { EventEmitter } = require('events')
 
 module.exports = class Socket extends EventEmitter {
@@ -19,6 +20,7 @@ module.exports = class Socket extends EventEmitter {
         const returnedData = JSON.parse(msg.toString())
 
         if (typeof returnedData.method !== 'undefined') {
+          const request = new
           this.emit('request', r)
         } else if (typeof returnedData.result !== 'undefined') {
 

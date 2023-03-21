@@ -6,7 +6,7 @@ class Request {
   }
    
   static fromJSON (request) {
-    return new this(request, request.request, request.params)
+    return new this(request.id, request.request, request.params)
   }
 
   toJSON () {
@@ -26,7 +26,7 @@ class Response {
   }
    
   static fromJSON (response) {
-    return new this(response, response.response, response.params)
+    return new this(response.id, response.response, response.params)
   }
 
   toJSON () {
@@ -36,4 +36,9 @@ class Response {
       data: this.params
     }
   }
+}
+
+module.exports = {
+  Request,
+  Response
 }
