@@ -1,4 +1,4 @@
-const Socket = require('./src/socket')
+const Socket = require('./socket')
 const Vote = require('./vote')
 
 const { EventEmitter } = require('events')
