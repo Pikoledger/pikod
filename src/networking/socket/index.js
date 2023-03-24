@@ -1,4 +1,4 @@
-const calls = require('./calls')
+const calls = require('./peer/calls')
 
 const dgram = require('dgram')
 const { EventEmitter } = require('events')
