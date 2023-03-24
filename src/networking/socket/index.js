@@ -1,4 +1,4 @@
-const calls = require('./peer/calls')
+const { Request, Response } = require('./peer/calls')
 
 const dgram = require('dgram')
 const { EventEmitter } = require('events')
@@ -10,7 +10,6 @@ module.exports = class Socket extends EventEmitter {
     this.socket = dgram.createSocket('udp4')
     this.socket.bind(port)
 
-    this.nonces = new Map()
     this.waitingRequests = []
 
     this._registerListeners()
