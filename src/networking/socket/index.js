@@ -8,8 +8,10 @@ module.exports = class Socket extends EventEmitter {
     super()
 
     this.socket = dgram.createSocket('udp4')
-
     this.socket.bind(port)
+
+    this.nonces = new Map()
+    this.waitingRequests = []
 
     this._registerListeners()
   }
@@ -20,10 +22,14 @@ module.exports = class Socket extends EventEmitter {
         const returnedData = JSON.parse(msg.toString())
 
         if (typeof returnedData.method !== 'undefined') {
-          const request = new
-          this.emit('request', r)
+          const request = new calls.Request(returnedData.id, returnedData.request, returnedData.params)
+          
+          this.emit('request', request)
         } else if (typeof returnedData.result !== 'undefined') {
-
+          const response = new calls.Response(returnedData.id, returnedData.result, returnedData.params)
+          
+          this.waitingRequests
+          this.emit('request', request)
         }
       } catch (err) {
         console.log(err)
