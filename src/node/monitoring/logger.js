@@ -1,19 +1,15 @@
 const chalk = require('chalk')
 
 module.exports = class Logger {
-  constructor (loggingLevel) {
-    this.loggingLevel = loggingLevel // TODO: Filter
-  }
-
-  reportDebug (debug) {
+  static debug (debug) {
     log(`${chalk.blue('DEBUG')} ${debug}`)
   }
 
-  reportError (error) {
+  static error (error) {
     log(`${chalk.red('ERROR')} ${error}`)
   }
 
-  reportInfo (info) {
+  static info (info) {
     log(`${chalk.magenta('LOG')} ${info}`)
   }
 }
