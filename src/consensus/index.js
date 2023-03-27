@@ -10,7 +10,7 @@ module.exports = class Consensus extends EventEmitter {
     this.storage = storage
 
     this.nodeAccount = undefined
-    this.activeElections = {} // TODO: Store it on storage instead of cache
+    this.activeElections = {} // TODO: Maybe store it on storage
 
     this.registerLedger()
   }
@@ -24,7 +24,7 @@ module.exports = class Consensus extends EventEmitter {
       await this.ledger.statesDB.put(genesisState.recipient, genesisState.toJSON())
     }
 
-    this.ledger.on('scoreMintage', async (amount) => {
+    this.ledger.on('scoreMintage', async (amount) => { // TODO: Rename stateChange
       await this.storage.put('scoreWeight', (await this.getScoreWeight()) + amount)
     })
   }
@@ -49,6 +49,8 @@ module.exports = class Consensus extends EventEmitter {
 
     if (this.activeElections[vote.hash] >= await this.getScoreWeight() / 2n) {
       await this.ledger.confirmBlock(vote.hash)
+      
+      this.emit('confirmation', vote.hash)
     }
   }
 
