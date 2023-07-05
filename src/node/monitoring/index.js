@@ -1,12 +1,9 @@
-module.exports = class Monitor {
-  constructor (modules, level) {
-    modules.forEach(module => {
-      
-    })
-    this.level = level
-  }
+const Logger = require('./logger')
 
-  static supportedModules () {
-    return [ "consensus" ]
+module.exports = class Monitor {
+  constructor () { // TODO: modules & log level
+    this.logger = new Logger()
+
+    this.logger.log('Lumi is READY!')
   }
 }
