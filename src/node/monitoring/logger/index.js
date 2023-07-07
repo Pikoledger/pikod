@@ -6,6 +6,10 @@ module.exports = class Logger {
     this.formatter = new Formatter()
   }
 
+  #createMessage (prefix, message) {
+    return `${this.formatter.stylize(styles.green, this.formatter.getReadableDate())} ${this.formatter.stylize(styles.cyan, this.formatter.getReadableTime())} ${prefix} ${message}`
+  }
+  
   log (message) {
     console.log(this.#createMessage(this.formatter.stylize(styles.pink, 'LOG'), message))
   }
@@ -16,9 +20,5 @@ module.exports = class Logger {
 
   error (error) {
     console.error(this.#createMessage(this.formatter.stylize(styles.red, 'ERR'), error))
-  }
-
-  #createMessage (prefix, message) {
-    return `${this.formatter.stylize(styles.green, this.formatter.getReadableDate())} ${this.formatter.stylize(styles.cyan, this.formatter.getReadableTime())} ${prefix} ${message}`
   }
 }

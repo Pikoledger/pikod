@@ -6,6 +6,8 @@
     "peeringPort": 6942
   },
   "node": {
-    "rpcPort": 3645
+    "rpcPort": 3645,
+    "ledgerPath": "./storage/ledger.db",
+    "walletPath": "./storage/wallet.json"
   }
 }
