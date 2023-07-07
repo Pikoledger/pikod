@@ -1,7 +1,4 @@
 {
-  "consensus": {
-    "quorum": 66
-  },
   "networking": {
     "peeringPort": 6942
   },
