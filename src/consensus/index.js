@@ -1,6 +1,5 @@
-const genesisState = require('../genesis')
-
 const { EventEmitter } = require('events')
+const genesisState = require('./genesis')
 
 module.exports = class Consensus extends EventEmitter {
   constructor (ledger, storage) {

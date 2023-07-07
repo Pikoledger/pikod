@@ -17,7 +17,7 @@ module.exports = class jsonRPC {
   }
 
   updateMethods () {
-    const methodFiles = fs.readdirSync('./src/node/api/jsonRPC/methods').filter(file => file.endsWith('.js'))
+    const methodFiles = fs.readdirSync('./src/services/api/jsonRPC/methods').filter(file => file.endsWith('.js'))
 
     for (const file of methodFiles) {
       const method = require(`./methods/${file}`)

@@ -1,12 +1,14 @@
+const { EventEmitter } = require('events')
 const Storage = require('./storage')
 const BlockDAG = require('../ledger/blockDAG')
 const Consensus = require('../consensus')
 const Network = require('../networking')
 const Wallet = require('./wallet')
-const Monitor = require('./monitoring')
 
-module.exports = class Node {
+module.exports = class Node extends EventEmitter {
   constructor (config) {
+    super()
+
     this.config = config
     this.storage = new Storage(config.node.ledgerPath)
     this.ledger = new BlockDAG({ 
@@ -18,24 +20,8 @@ module.exports = class Node {
     this.consensus = new Consensus(this.ledger, this.storage.openDB('consensus'))
     this.networking = new Network(this.config.node.peeringPort, this.consensus)
     this.wallet = Wallet.fromPath(this.config.node.walletPath)
-    this.networking.joinNetwork(wallet)
+    this.networking.joinNetwork(this.wallet)
+
+    this.emit('ready')
   }
 }
-
-const config = require('./config.json')
-const storage = new Storage('./storage/ledger.db')
-
-const ledger = new BlockDAG({ 
-  accounts: storage.openDB('accounts'),
-  states: storage.openDB('states'),
-  indexes: storage.openDB('indexes'),
-  blocks: storage.openDB('blocks')
-})
-const consensus = new Consensus(ledger, storage.openDB('consensus'))
-const networking = new Network(config.node.peeringPort, consensus)
-
-const wallet = Wallet.fromPath('./storage/wallet.json')
-networking.joinNetwork(wallet)
-
-const jsonRPC = new (require('./src/node/api/jsonRPC'))(config.node.rpcPort, { ledger, consensus, networking })
-const monitor = new Monitor()

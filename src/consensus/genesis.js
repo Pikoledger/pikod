@@ -1,4 +1,4 @@
-const State = require('./ledger/state')
+const State = require('../ledger/state')
 
 const genesisState = new State({
   balance: BigInt('3600000') * BigInt(1e8),
