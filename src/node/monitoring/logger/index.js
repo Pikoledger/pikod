@@ -6,15 +6,19 @@ module.exports = class Logger {
     this.formatter = new Formatter()
   }
 
-  log (message, prefix) { // IDEA: use stderr etc. by console.error too
-    console.log(`${this.formatter.stylize(styles.green, this.formatter.getReadableDate())} ${this.formatter.stylize(styles.yellowLight, this.formatter.getReadableTime())} ${prefix ?? "LOG"} ${message}`)
+  log (message) {
+    console.log(this.#createMessage(this.formatter.stylize(styles.pink, 'LOG'), message))
   }
 
   warn (warning) {
-    this.log(warning, this.formatter.stylize(styles.yellow, 'WARN'))
+    console.warn(this.#createMessage(this.formatter.stylize(styles.yellow, 'WARN'), warning))
   }
 
   error (error) {
-    this.log(error, this.formatter.stylize(styles.red, 'ERR'))
+    console.error(this.#createMessage(this.formatter.stylize(styles.red, 'ERR'), error))
+  }
+
+  #createMessage (prefix, message) {
+    return `${this.formatter.stylize(styles.green, this.formatter.getReadableDate())} ${this.formatter.stylize(styles.cyan, this.formatter.getReadableTime())} ${prefix} ${message}`
   }
 }
