@@ -1,9 +1,11 @@
 const Logger = require('./logger')
 
 module.exports = class Monitor {
-  constructor () { // TODO: modules & log level
+  constructor (modules, logLevel) {
     this.logger = new Logger()
 
-    this.logger.log('Lumi is READY!')
+    for (const module of modules) {
+      
+    }
   }
 }
